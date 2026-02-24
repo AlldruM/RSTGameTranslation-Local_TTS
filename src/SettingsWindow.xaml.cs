@@ -951,6 +951,9 @@ namespace RSTGameTranslation
             // Set auto set overlay background color
             autoSetOverlayBackgroundColorcheckBox.IsChecked = ConfigManager.Instance.IsAutoSetOverlayBackground();
 
+            // Set auto merge overlapping text
+            autoMergeOverlappingTextCheckBox.IsChecked = ConfigManager.Instance.IsAutoMergeOverlappingTextEnabled();
+
             // Set auto OCR
             AutoOCRCheckBox.IsChecked = ConfigManager.Instance.IsAutoOCREnabled();
 
@@ -1262,12 +1265,12 @@ namespace RSTGameTranslation
             elevenLabsVoiceComboBox.SelectionChanged += ElevenLabsVoiceComboBox_SelectionChanged;
             googleTtsVoiceComboBox.SelectionChanged += GoogleTtsVoiceComboBox_SelectionChanged;
             windowTTSVoiceComboBox.SelectionChanged += WindowTTSVoiceComboBox_SelectionChanged;
-            if (localTtsVoiceComboBox != null) localTtsVoiceComboBox.SelectionChanged += LocalTtsVoiceComboBox_SelectionChanged;
-            if (localTtsModeComboBox != null) localTtsModeComboBox.SelectionChanged += LocalTtsModeComboBox_SelectionChanged;
-            if (localTtsUrlTextBox != null) localTtsUrlTextBox.LostFocus += LocalTtsUrlTextBox_LostFocus;
 
             // Load ignore phrases
             LoadIgnorePhrases();
+
+            // Load exclude regions
+            LoadExcludeRegions();
 
             // Audio Processing settings
             audioProcessingProviderComboBox.SelectedIndex = 0; // Only one for now
@@ -1325,12 +1328,13 @@ namespace RSTGameTranslation
                     ConfigManager.Instance.SetHotKey(functionName, combineKey);
                     statusUpdateHotKey.Visibility = Visibility.Visible;
                     ListHotKey_TextChanged();
-                    // Init keyboard hook
-                    KeyboardShortcuts.InitializeGlobalHook();
-                    IntPtr handle = new WindowInteropHelper(this).Handle;
-                    KeyboardShortcuts.SetMainWindowHandle(handle);
-                    HwndSource source = HwndSource.FromHwnd(handle);
-                    source.AddHook(WndProc);
+                    // Refresh parsed hotkeys and re-register on the main window handle
+                    KeyboardShortcuts.RefreshHotkeys();
+                    IntPtr mainHandle = new WindowInteropHelper(MainWindow.Instance).Handle;
+                    if (mainHandle != IntPtr.Zero)
+                    {
+                        KeyboardShortcuts.SetMainWindowHandle(mainHandle);
+                    }
                     // Auto close notification after 1.5 second
                     var timer = new System.Windows.Threading.DispatcherTimer
                     {
@@ -1380,6 +1384,7 @@ namespace RSTGameTranslation
             hotKeyAudio.Text = ConfigManager.Instance.GetHotKey("Audio Service");
             hotKeySwapLanguages.Text = ConfigManager.Instance.GetHotKey("Swap Languages");
             hotKeyRetryTranslate.Text = ConfigManager.Instance.GetHotKey("Retry Translation");
+            hotKeyToggleExcludeRegions.Text = ConfigManager.Instance.GetHotKey("Select Exclude Region");
             // Mainwindows
             MainWindow.Instance.hotKeyStartStop.Text = ConfigManager.Instance.GetHotKey("Start/Stop");
             MainWindow.Instance.hotKeyOverlay.Text = ConfigManager.Instance.GetHotKey("Overlay");
@@ -1398,6 +1403,10 @@ namespace RSTGameTranslation
             MainWindow.Instance.hotKeyAudio.Text = ConfigManager.Instance.GetHotKey("Audio Service");
             MainWindow.Instance.hotKeySwapLanguages.Text = ConfigManager.Instance.GetHotKey("Swap Languages");
             MainWindow.Instance.hotKeyRetryTranslate.Text = ConfigManager.Instance.GetHotKey("Retry Translation");
+            if (MainWindow.Instance.FindName("hotKeyToggleExcludeRegions") is TextBlock hotKeyToggleExcludeRegionsText)
+            {
+                hotKeyToggleExcludeRegionsText.Text = ConfigManager.Instance.GetHotKey("Select Exclude Region");
+            }
         }
 
         private void HotKeyFunctionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1917,6 +1926,7 @@ namespace RSTGameTranslation
                 customApiUrlTextBox.Visibility = isCustomApiSelected ? Visibility.Visible : Visibility.Collapsed;
                 customApiModelLabel.Visibility = isCustomApiSelected ? Visibility.Visible : Visibility.Collapsed;
                 customApiModelGrid.Visibility = isCustomApiSelected ? Visibility.Visible : Visibility.Collapsed;
+                customApiNoteTextBlock.Visibility = isCustomApiSelected ? Visibility.Visible : Visibility.Collapsed;
 
                 // Show/hide Groq-specific settings
                 groqApiKeyLabel.Visibility = isGroqSelected ? Visibility.Visible : Visibility.Collapsed;
@@ -2953,20 +2963,20 @@ namespace RSTGameTranslation
 
                 if (localWhisperService.Instance.IsRunning)
                 {
-                   MessageBoxResult result = MessageBox.Show(
-                        LocalizationManager.Instance.Strings["Msg_WhisperServiceRunning"],
-                        LocalizationManager.Instance.Strings["Title_Confirm"],
-                        MessageBoxButton.OKCancel,
-                        MessageBoxImage.Warning
-                    );
+                    MessageBoxResult result = MessageBox.Show(
+                         LocalizationManager.Instance.Strings["Msg_WhisperServiceRunning"],
+                         LocalizationManager.Instance.Strings["Title_Confirm"],
+                         MessageBoxButton.OKCancel,
+                         MessageBoxImage.Warning
+                     );
                     if (result == MessageBoxResult.Cancel)
                     {
                         if (e.RemovedItems.Count > 0)
                         {
-                            _isInitializing = true; 
-                            
+                            _isInitializing = true;
+
                             audioProcessingModelComboBox.SelectedItem = e.RemovedItems[0];
-                            
+
                             _isInitializing = false;
                         }
                         return;
@@ -3008,7 +3018,7 @@ namespace RSTGameTranslation
 
                 // Update thread count visibility (only show for CPU)
                 UpdateWhisperThreadCountVisibility(newRuntime);
-                
+
                 // if no change, do nothing
                 if (string.Equals(newRuntime, currentRuntime, StringComparison.OrdinalIgnoreCase))
                     return;
@@ -3020,7 +3030,7 @@ namespace RSTGameTranslation
                     MessageBoxButton.OKCancel,
                     MessageBoxImage.Information
                 );
-                
+
                 if (result == MessageBoxResult.Cancel)
                 {
                     // Revert selection
@@ -3061,7 +3071,7 @@ namespace RSTGameTranslation
         {
             bool isCpu = string.Equals(runtime, "cpu", StringComparison.OrdinalIgnoreCase);
             Visibility visibility = isCpu ? Visibility.Visible : Visibility.Collapsed;
-            
+
             whisperThreadCountLabel.Visibility = visibility;
             whisperThreadCountTextBox.Visibility = visibility;
             whisperThreadCountTip.Visibility = visibility;
@@ -4126,7 +4136,7 @@ namespace RSTGameTranslation
                         else
                         {
                             // Clear saved areas in config if we have none
-                            ConfigManager.Instance.SaveTranslationAreas(new List<Rect>(), selectedText);
+                            ConfigManager.Instance.SaveTranslationAreas(new List<TranslationAreaInfo>(), selectedText);
                             Console.WriteLine("Cleared translation areas in config");
                         }
                         // Show status
@@ -4180,7 +4190,7 @@ namespace RSTGameTranslation
                 if (File.Exists(filePath))
                 {
                     // Get saved areas from config
-                    List<Rect> areas = ConfigManager.Instance.GetTranslationAreas(filePath);
+                    List<TranslationAreaInfo> areas = ConfigManager.Instance.GetTranslationAreas(filePath);
                     if (areas.Count > 0)
                     {
                         // Update our areas list
@@ -4511,6 +4521,74 @@ namespace RSTGameTranslation
             }
         }
 
+        // Load exclude regions from ConfigManager
+        private void LoadExcludeRegions()
+        {
+            try
+            {
+                // Get regions from MainWindow (which loads from ConfigManager)
+                var regions = MainWindow.Instance.excludeRegions;
+
+                // Populate the list view
+                excludeRegionsListView.ItemsSource = regions;
+
+                // Set the show exclude regions checkbox
+                showExcludeRegionsCheckBox.IsChecked = MainWindow.Instance.GetShowExcludeRegions();
+
+                Console.WriteLine($"Loaded {regions.Count} exclude regions from config");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading exclude regions: {ex.Message}");
+            }
+        }
+
+        // Add a new exclude region
+        private void AddExcludeRegionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Hide settings window
+            this.Hide();
+
+            // Trigger exclude region selection
+            MainWindow.Instance.ToggleExcludeRegionSelector();
+
+
+            // Reload to show the new region
+            LoadExcludeRegions();
+        }
+
+        // Clear all exclude regions
+        private void ClearExcludeRegionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MainWindow.Instance.ClearExcludeRegions();
+                excludeRegionsListView.ItemsSource = null;
+                excludeRegionsListView.ItemsSource = MainWindow.Instance.excludeRegions;
+                Console.WriteLine("All exclude regions cleared from settings");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error clearing exclude regions: {ex.Message}");
+            }
+        }
+
+        // Show exclude regions checkbox checked
+        private void ShowExcludeRegionsCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isInitializing) return;
+            bool show = showExcludeRegionsCheckBox.IsChecked ?? true;
+            MainWindow.Instance.SetShowExcludeRegions(show);
+        }
+
+        // Show exclude regions checkbox unchecked
+        private void ShowExcludeRegionsCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isInitializing) return;
+            bool show = showExcludeRegionsCheckBox.IsChecked ?? true;
+            MainWindow.Instance.SetShowExcludeRegions(show);
+        }
+
         private void ShowIconSignal_CheckedChanged(object sender, RoutedEventArgs e)
         {
             bool enabled = showIconSignalCheckBox.IsChecked ?? false;
@@ -4557,20 +4635,21 @@ namespace RSTGameTranslation
                 else
                 {
                     Console.WriteLine("[SettingsWindow] Starting Local Whisper service...");
-                    await localWhisperService.Instance.StartServiceAsync((original, translated) =>
-                    {
-                        Console.WriteLine($"Whisper detected: {original}");
-                    });
-                    Console.WriteLine("Local Whisper Service started");
-                }
+                await localWhisperService.Instance.StartServiceAsync((original, translated) =>
+                {
+                    Console.WriteLine($"Whisper detected: {original}");
+                });
+                Console.WriteLine("Local Whisper Service started");
+            }
             }
             else if (!enabled)
             {
                 if (localWhisperService.Instance.IsRunning)
-                {
-                    localWhisperService.Instance.Stop();
-                    Console.WriteLine("Local Whisper Service stopped");
-                }
+            {
+                // Stop the local Whisper service if it was running
+                localWhisperService.Instance.Stop();
+                Console.WriteLine("Local Whisper Service stopped");
+            }
                 if (LocalSileroSTTService.Instance.IsRunning)
                 {
                     LocalSileroSTTService.Instance.Stop();
@@ -4719,7 +4798,7 @@ namespace RSTGameTranslation
                 if (sender is TextBlock textBlock)
                 {
                     UpdateAudioModelDownloadText(textBlock);
-                    
+
                     LocalizationManager.Instance.PropertyChanged += (s, args) =>
                     {
                         if (args.PropertyName == "Strings")
@@ -4740,9 +4819,9 @@ namespace RSTGameTranslation
             try
             {
                 textBlock.Inlines.Clear();
-                
+
                 textBlock.Inlines.Add(new Run(LocalizationManager.Instance.Strings["Tip_AudioModelDownload_Part1"]));
-                
+
                 // Hyperlink
                 var hyperlink = new Hyperlink(new Run("https://huggingface.co/ggerganov/whisper.cpp/tree/main"))
                 {
@@ -4751,7 +4830,7 @@ namespace RSTGameTranslation
                 };
                 hyperlink.RequestNavigate += Hyperlink_RequestNavigate;
                 textBlock.Inlines.Add(hyperlink);
-                
+
                 textBlock.Inlines.Add(new Run(LocalizationManager.Instance.Strings["Tip_AudioModelDownload_Part2"]));
             }
             catch (Exception ex)
@@ -4870,6 +4949,13 @@ namespace RSTGameTranslation
             bool enabled = autoSetOverlayBackgroundColorcheckBox.IsChecked ?? true;
             ConfigManager.Instance.SetAutoSetOverlayBackground(enabled);
             Console.WriteLine($"Auto set overlay background color set to {enabled}");
+        }
+
+        private void AutoMergeOverlappingTextCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            bool enabled = autoMergeOverlappingTextCheckBox.IsChecked ?? true;
+            ConfigManager.Instance.SetAutoMergeOverlappingText(enabled);
+            Console.WriteLine($"Auto merge overlapping text set to {enabled}");
         }
 
         private void SetHotKeyEnableCheckBox_CheckChange(object sender, RoutedEventArgs e)
@@ -5136,7 +5222,7 @@ namespace RSTGameTranslation
                 );
                 return;
             }
-            
+
             Console.WriteLine("OCR data removed successfully");
         }
 
@@ -5187,7 +5273,7 @@ namespace RSTGameTranslation
             try
             {
                 string debounceText = clipboardDebounceTextBox.Text?.Trim() ?? "";
-                
+
                 if (int.TryParse(debounceText, out int debounceMs))
                 {
                     ConfigManager.Instance.SetClipboardDebounceMs(debounceMs);
@@ -5216,7 +5302,7 @@ namespace RSTGameTranslation
             try
             {
                 string maxCharsText = clipboardMaxCharsTextBox.Text?.Trim() ?? "";
-                
+
                 if (int.TryParse(maxCharsText, out int maxChars))
                 {
                     ConfigManager.Instance.SetClipboardMaxChars(maxChars);
