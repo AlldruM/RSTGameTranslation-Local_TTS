@@ -1265,6 +1265,9 @@ namespace RSTGameTranslation
             elevenLabsVoiceComboBox.SelectionChanged += ElevenLabsVoiceComboBox_SelectionChanged;
             googleTtsVoiceComboBox.SelectionChanged += GoogleTtsVoiceComboBox_SelectionChanged;
             windowTTSVoiceComboBox.SelectionChanged += WindowTTSVoiceComboBox_SelectionChanged;
+            if (localTtsVoiceComboBox != null) localTtsVoiceComboBox.SelectionChanged += LocalTtsVoiceComboBox_SelectionChanged;
+            if (localTtsModeComboBox != null) localTtsModeComboBox.SelectionChanged += LocalTtsModeComboBox_SelectionChanged;
+            if (localTtsUrlTextBox != null) localTtsUrlTextBox.LostFocus += LocalTtsUrlTextBox_LostFocus;
 
             // Load ignore phrases
             LoadIgnorePhrases();

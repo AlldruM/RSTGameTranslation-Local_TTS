@@ -1304,7 +1304,7 @@
                                 <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,5">
                                     <Slider x:Name="ttsVolumeSlider" Minimum="0" Maximum="1" Value="1" SmallChange="0.05" LargeChange="0.2" Width="150" VerticalAlignment="Center"
                                             ValueChanged="TtsVolumeSlider_ValueChanged"/>
-                                    
+
                                     <TextBlock x:Name="ttsVolumeValueText" Text="100%" VerticalAlignment="Center" Margin="8,0,0,0"/>
                                 </StackPanel>
 
@@ -1406,8 +1406,7 @@
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Text="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Lbl_RoboticVoices]}" Grid.Row="0" Grid.Column="0" 
-                                                VerticalAlignment="Top" Margin="0,5,10,0" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Lbl_RoboticVoices]}" Grid.Row="0" Grid.Column="0" Margin="0,5,10,0" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                                         <TextBlock Grid.Row="0" Grid.Column="1" 
                                                 VerticalAlignment="Top" Margin="0,5,0,0" TextWrapping="Wrap"
                                                 Text="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Msg_RoboticVoicesGuide]}"/>
@@ -1547,18 +1546,18 @@
                                 <StackPanel x:Name="localTtsMainCharWavPanel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Margin="0,0,0,10" Focusable="True">
                                     <TextBox x:Name="localTtsMainCharWavTextBox" MinWidth="250" Margin="0,0,0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                                     <Button Content="Select WAV" Padding="6,2" Click="LocalTtsMainCharWavButton_Click" HorizontalAlignment="Center"/>
-                    </StackPanel>
+                                </StackPanel>
                                 <TextBlock x:Name="localTtsMainCharTxtLabel" Text="Main character transcript (TXT):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,5"/>
                                 <StackPanel x:Name="localTtsMainCharTxtPanel" Grid.Row="2" Grid.Column="1" Orientation="Vertical" Margin="0,0,0,5">
                                     <TextBox x:Name="localTtsMainCharTxtTextBox" MinWidth="250" Margin="0,0,0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                                     <Button Content="Select TXT" Padding="6,2" Click="LocalTtsMainCharTxtButton_Click" HorizontalAlignment="Center"/>
                                 </StackPanel>
-                                
+
                                 <!-- Male voices in collapsible Expander -->
                                 <Expander x:Name="localTtsMaleVoicesExpander" Header="Male voices (comma or line break)" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,5,0,5" IsExpanded="False" ToolTip="Names from asset\RussianArtistsDub\men-*.wav, seprate by comma or line breake" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <TextBox x:Name="localTtsMaleVoicesTextBox" Margin="0,5,0,0" MinHeight="60" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" ToolTip="men-Dahnenko_Mikl_Scof,men-Kolgan" LostFocus="LocalTtsMaleVoicesTextBox_LostFocus"/>
                                 </Expander>
-                                
+
                                 <!-- Female voices in collapsible Expander -->
                                 <Expander x:Name="localTtsFemaleVoicesExpander" Header="Female voices (comma or line break)" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,5,0,5" IsExpanded="False" ToolTip="Names from asset\RussianArtistsDub\wom-*.wav, seprate by comma or line breake" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <TextBox x:Name="localTtsFemaleVoicesTextBox" Margin="0,6,0,0" MinHeight="60" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" ToolTip="wom-Kireeva_Irina,wom-tereshkova" LostFocus="LocalTtsFemaleVoicesTextBox_LostFocus"/>
@@ -1568,13 +1567,13 @@
                                 <Expander x:Name="localTtsCharacterGendersExpander" Header="Character genders (Name:male/female/main):" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,5,0,5" IsExpanded="False" ToolTip="All charachters in game" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <TextBox x:Name="localTtsCharacterGendersTextBox" Margin="0,6,0,0" MinHeight="60" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" ToolTip="e.g. Ivan:male,Elena:female,Protagonist:main" LostFocus="LocalTtsCharacterGendersTextBox_LostFocus"/>
                                 </Expander>
-                                
+
                                 <!-- Test buttons -->
                                 <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Button x:Name="localTtsTestMainVoiceButton" Content="Test main voice" Padding="8,2" Click="LocalTtsTestMainVoiceButton_Click" ToolTip="Test main charachter voice" Margin="0,0,5,0"/>
                                     <Button x:Name="localTtsTestMaleVoiceButton" Content="Test men voice" Padding="8,2" Click="LocalTtsTestMaleVoiceButton_Click" ToolTip="Test randomly men voice (men-*)" Margin="0,0,5,0"/>
                                     <Button x:Name="localTtsTestFemaleVoiceButton" Content="Test women voice" Padding="8,2" Click="LocalTtsTestFemaleVoiceButton_Click" ToolTip="Test randomly women voice (wom-*)" Margin="0,0,5,0"/>
-                    </StackPanel>
+                                </StackPanel>
                             </Grid>
                         </GroupBox>
                     </StackPanel>
