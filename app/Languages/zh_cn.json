@@ -510,7 +510,7 @@
   "Btn_ChooseAudioFile": "选择音频文件并测试",
   "Btn_ClearResult": "清除",
   "Btn_CheckServer": "检查服务器",
-  "Tooltip_CheckServer": "检查 TTS 服务器连接"
+  "Tooltip_CheckServer": "检查 TTS 服务器连接",
 
   "Quickstart_Title": "快速入门指南",
   "Quickstart_Btn_Skip": "跳过",

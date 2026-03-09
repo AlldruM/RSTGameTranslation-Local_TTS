@@ -513,7 +513,7 @@
   "Btn_ChooseAudioFile": "Выбрать аудиофайл и тестировать",
   "Btn_ClearResult": "Очистить результат",
   "Btn_CheckServer": "Проверить сервер",
-  "Tooltip_CheckServer": "Проверка подключения к TTS серверу"
+  "Tooltip_CheckServer": "Проверка подключения к TTS серверу",
 
   "Quickstart_Title": "Руководство по быстрому запуску",
   "Quickstart_Btn_Skip": "Пропустить",

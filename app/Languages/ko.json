@@ -513,7 +513,7 @@
   "Btn_ChooseAudioFile": "오디오 파일 선택 및 테스트",
   "Btn_ClearResult": "지우기",
   "Btn_CheckServer": "서버 확인",
-  "Tooltip_CheckServer": "TTS 서버 연결 확인"
+  "Tooltip_CheckServer": "TTS 서버 연결 확인",
 
   "Quickstart_Title": "빠른 시작 가이드",
   "Quickstart_Btn_Skip": "건너뛰기",

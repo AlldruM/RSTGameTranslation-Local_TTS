@@ -513,7 +513,7 @@
   "Btn_ChooseAudioFile": "オーディオファイルを選択してテスト",
   "Btn_ClearResult": "クリア",
   "Btn_CheckServer": "サーバーを確認",
-  "Tooltip_CheckServer": "TTSサーバー接続を確認"
+  "Tooltip_CheckServer": "TTSサーバー接続を確認",
 
   "Quickstart_Title": "Quick Start Guide",
   "Quickstart_Btn_Skip": "スキップ",

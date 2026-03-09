@@ -513,7 +513,7 @@
   "Btn_ChooseAudioFile": "Choose Audio File & Test",
   "Btn_ClearResult": "Clear",
   "Btn_CheckServer": "Check Server",
-  "Tooltip_CheckServer": "Check TTS server connection"
+  "Tooltip_CheckServer": "Check TTS server connection",
 
   "Quickstart_Title": "Quick Start Guide",
   "Quickstart_Btn_Skip": "Skip",

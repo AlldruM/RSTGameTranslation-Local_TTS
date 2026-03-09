@@ -515,7 +515,7 @@
   "Btn_ChooseAudioFile": "Chọn tệp tin âm thanh và kiểm tra",
   "Btn_ClearResult": "Xóa",
   "Btn_CheckServer": "Kiểm tra máy chủ",
-  "Tooltip_CheckServer": "Kiểm tra kết nối máy chủ TTS"
+  "Tooltip_CheckServer": "Kiểm tra kết nối máy chủ TTS",
 
   "Quickstart_Title": "Hướng Dẫn Nhanh",
   "Quickstart_Btn_Skip": "Bỏ qua",
